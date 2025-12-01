@@ -7,14 +7,20 @@
     <title>Marburg Virus Disease Outbreak Monitoring - Ethiopia MoH</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- Use Inter font family -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-primary: 90 89 83; /* Dark Maroon/Red for urgency: A deep, authoritative color */
-            --color-secondary: 254 205 211; /* Light Pink for background accents */
-            --color-accent: 5 150 105; /* Emerald Green for control/positive stats */
-            --color-alert: 239 68 68; /* Red for high risk */
+            --color-primary: 109 10 24;
+            /* Deep, authoritative Maroon/Red for main theme */
+            --color-secondary: 253 232 214;
+            /* Soft gold/peach accent for gradients/contrast */
+            --color-accent: 5 150 105;
+            /* Emerald Green for control/positive stats */
+            --color-alert: 239 68 68;
+            /* Red for high risk */
         }
 
         body {
@@ -47,22 +53,32 @@
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
+
         ::-webkit-scrollbar-thumb {
             background: rgb(var(--color-primary));
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #440c0c;
         }
 
         /* Animation for Risk Level pulse */
         @keyframes pulse-high {
-            0%, 100% { background-color: rgb(var(--color-alert)); }
-            50% { background-color: #f87171; }
+            0%,
+            100% {
+                background-color: rgb(var(--color-alert));
+            }
+
+            50% {
+                background-color: #f87171;
+            }
         }
+
         .animate-pulse-high {
             animation: pulse-high 2s infinite;
         }
@@ -86,7 +102,7 @@
                         <span class="ml-1 text-xl font-semibold text-gray-700">Marburg Monitor</span>
                     </a>
                 </div>
-                
+
                 <div class="hidden md:flex space-x-8">
                     <a href="#dashboard" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Dashboard</a>
                     <a href="#analysis" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Data Analysis</a>
@@ -96,7 +112,9 @@
                 </div>
                 <div class="md:hidden">
                     <button id="menu-button" class="text-gray-600 hover:text-red-700 focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -145,7 +163,7 @@
             <div id="metric-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Data will be populated here by JavaScript -->
             </div>
-            
+
             <!-- Risk Level & Action Status -->
             <div class="mt-16 bg-white p-8 rounded-2xl shadow-xl border-t-4 border-red-700">
                 <div class="flex flex-col lg:flex-row items-center justify-between">
@@ -173,14 +191,14 @@
                 Outbreak Data Analysis
             </h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                
-                <!-- Daily Trends -->
+
+                <!-- Daily Trends (Table - showing NEW cases) -->
                 <div class="p-8 rounded-2xl shadow-xl border border-gray-100">
                     <h3 class="text-2xl font-bold text-red-800 mb-4 flex items-center">
-                        <span class="text-3xl mr-3">🗓️</span> Daily Trends
+                        <span class="text-3xl mr-3">🗓️</span> Daily New Case Trends
                     </h3>
-                    <p class="text-gray-600 mb-6">Confirmed cases and deaths over the last 7 days, indicating growth rate and immediate impact.</p>
-                    <div id="daily-trends-container" class="space-y-4">
+                    <p class="text-gray-600 mb-6">Confirmed *new* cases and deaths reported daily over the last 7 days.</p>
+                    <div id="daily-trends-container" class="space-y-4 overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -196,27 +214,16 @@
                     </div>
                 </div>
 
-                <!-- Short-Term Forecasting -->
+                <!-- Short-Term Forecasting (Chart - showing CUMULATIVE cases/deaths) -->
                 <div class="p-8 rounded-2xl shadow-xl border border-gray-100 bg-red-50">
                     <h3 class="text-2xl font-bold text-red-800 mb-4 flex items-center">
-                        <span class="text-3xl mr-3">🔮</span> Short-Term Forecast
+                        <span class="text-3xl mr-3">🔮</span> Cumulative Trend & Forecast
                     </h3>
-                    <p class="text-gray-600 mb-6">Projection of confirmed cases and deaths for the next 3 days based on current trends. <span class="font-semibold text-red-700">(Model estimate only)</span></p>
+                    <p class="text-gray-600 mb-6">Cumulative cases and deaths shown with a short-term projection (dashed line indicates forecast).</p>
                     <div id="forecasting-container" class="space-y-4">
-                        <table class="min-w-full divide-y divide-red-200 rounded-lg overflow-hidden">
-                            <thead class="bg-red-100">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Projected Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Projected Cases</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-red-700 uppercase tracking-wider">Projected Deaths</th>
-                                </tr>
-                            </thead>
-                            <tbody id="forecasting-data" class="bg-white divide-y divide-red-200">
-                                <!-- Data populated by JS -->
-                            </tbody>
-                        </table>
+                        <canvas id="forecastChart" class="w-full h-80"></canvas>
                     </div>
-                    <p class="mt-8 text-sm text-gray-500 italic">This projection uses a simplified moving average model. Official response planning incorporates more complex epidemiological modeling.</p>
+                    <p class="mt-8 text-sm text-gray-500 italic">This chart tracks the overall growth curve. The model estimate (dashed line) is based on simplified epidemiological principles and is subject to change.</p>
                 </div>
             </div>
         </div>
@@ -257,7 +264,7 @@
             <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-12">
                 SITUATION REPORT
             </h2>
-            
+
             <div class="bg-white p-6 md:p-10 rounded-2xl shadow-2xl border border-gray-100">
                 <div id="report-header" class="border-b pb-4 mb-6">
                     <p class="text-xs font-bold uppercase tracking-widest text-red-600">Official Document</p>
@@ -265,7 +272,7 @@
                     <p id="report-status" class="mt-1 text-lg font-semibold text-gray-700"></p>
                     <p id="report-date" class="text-sm text-gray-500"></p>
                 </div>
-                
+
                 <div id="executive-summary" class="mb-8">
                     <h4 class="text-xl font-bold text-gray-800 mb-3 border-l-4 border-red-500 pl-3">Executive Summary</h4>
                     <p id="summary-content" class="text-gray-700 leading-relaxed whitespace-pre-line"></p>
@@ -279,7 +286,7 @@
                             <!-- Populated by JS -->
                         </div>
                     </div>
-                    
+
                     <!-- Section 2: Response & Recommendations -->
                     <div class="lg:col-span-2">
                         <h4 class="text-xl font-bold text-gray-800 mb-3 border-l-4 border-red-500 pl-3">Immediate Actions & Recommendations</h4>
@@ -339,11 +346,9 @@
 
         /**
          * Generates the simulated outbreak data and situation report based on the provided Python logic.
-         * In a real application, this data would be fetched from a secure API endpoint.
          * NOTE: Data consolidation logic uses MOH, EPHI, and international partner data for verified metrics.
          */
         const getOutbreakData = () => {
-            // Data derived from the Python class structure in the prompt.
             const confirmedCases = 12; // Max of CDC (12)
             const deaths = 7; // Max of CDC (7)
             const suspectedCases = 73; // From EPHI/Lab reports
@@ -390,73 +395,120 @@
                         "Mobilize national and international resources."
                     );
                 }
-                
+
                 if (cases > 10 || riskLevel === "Critical") {
-                     recommendations.push(
+                    recommendations.push(
                         "Consider declaring public health emergency.",
                         "Implement enhanced border screening if indicated.",
                         "Scale up risk communication nationwide."
-                     );
+                    );
                 }
-                
+
                 // Return unique recommendations only
                 return [...new Set(recommendations)];
             };
-            
+
             // --- TRENDS AND FORECASTING SIMULATION ---
-            
-            const getDailyTrends = () => {
-                // Mock daily data for the last 7 days (Date, New Cases, New Deaths)
-                // This simulates a small, growing outbreak
+
+            // Base cumulative numbers 7 days ago, ensuring today's numbers (12, 7) are met by new cases below
+            let cumulativeCases = 5; 
+            let cumulativeDeaths = 3;
+
+            const getDailyNewData = () => {
                 const today = new Date();
-                const trends = [
-                    { date: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000), cases: 0, deaths: 0 },
-                    { date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), cases: 1, deaths: 0 },
-                    { date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000), cases: 2, deaths: 1 },
-                    { date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000), cases: 3, deaths: 1 },
-                    { date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), cases: 4, deaths: 2 },
-                    { date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), cases: 1, deaths: 1 },
-                    { date: today, cases: 1, deaths: 2 } // Today's data
+                // Data for the last 6 days + today (7 data points)
+                const newDailyData = [
+                    { date: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000), newCases: 0, newDeaths: 0 },
+                    { date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 0 },
+                    { date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000), newCases: 2, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), newCases: 3, newDeaths: 0 },
+                    { date: today, newCases: 4, newDeaths: 4 } // Today: 4+4=8. Total cumulative: 5+1+1+2+1+3+4 = 17. Must adjust initial cumulative to match 12.
                 ];
-                return trends.map(day => ({
+                
+                // Let's adjust the mock data to match the confirmedCases (12) and deaths (7)
+                // New cases: 0, 1, 1, 2, 1, 3, 4. Sum = 12. Perfect.
+                // New deaths: 0, 1, 0, 1, 1, 3, 1. Sum = 7. Perfect.
+                
+                const finalNewData = [
+                    { date: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000), newCases: 0, newDeaths: 0 },
+                    { date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 0 },
+                    { date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000), newCases: 2, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), newCases: 1, newDeaths: 1 },
+                    { date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000), newCases: 3, newDeaths: 3 },
+                    { date: today, newCases: 4, newDeaths: 1 } 
+                ];
+
+                return finalNewData.map(day => ({
                     date: day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                    cases: day.cases,
-                    deaths: day.deaths
+                    newCases: day.newCases,
+                    newDeaths: day.newDeaths
                 }));
             };
 
-            const generateForecast = (trends) => {
-                const latestCases = trends.slice(-7).map(d => d.cases);
-                const latestDeaths = trends.slice(-7).map(d => d.deaths);
+            const dailyNewData = getDailyNewData();
+
+            const getCumulativeData = (newDailyData) => {
+                let currentCumCases = 0;
+                let currentCumDeaths = 0;
                 
-                // Simple average increase calculation
-                const avgCaseIncrease = latestCases.reduce((sum, val) => sum + val, 0) / latestCases.length;
-                const avgDeathIncrease = latestDeaths.reduce((sum, val) => sum + val, 0) / latestDeaths.length;
-                
+                return newDailyData.map(day => {
+                    currentCumCases += day.newCases;
+                    currentCumDeaths += day.newDeaths;
+                    return {
+                        date: day.date,
+                        cumulativeCases: currentCumCases,
+                        cumulativeDeaths: currentCumDeaths
+                    };
+                });
+            };
+            
+            const cumulativeHistory = getCumulativeData(dailyNewData.map(d => ({
+                date: d.date,
+                newCases: d.newCases,
+                newDeaths: d.newDeaths
+            })));
+
+            const generateForecast = (cumulativeHistory) => {
+                const forecastDays = 3;
                 const forecast = [];
-                const tomorrow = new Date();
+                const lastHistoryPoint = cumulativeHistory[cumulativeHistory.length - 1];
+
+                // Simple average increase over last 3 days for trend
+                const recentNewCases = dailyNewData.slice(-3).map(d => d.newCases);
+                const recentNewDeaths = dailyNewData.slice(-3).map(d => d.newDeaths);
                 
-                for (let i = 1; i <= 3; i++) {
-                    const futureDate = new Date(tomorrow.getTime() + i * 24 * 60 * 60 * 1000);
-                    const lastForecast = forecast.length > 0 ? forecast[forecast.length - 1] : { cases: latestCases.slice(-1)[0], deaths: latestDeaths.slice(-1)[0] };
+                const avgCaseIncrease = recentNewCases.reduce((sum, val) => sum + val, 0) / recentNewCases.length;
+                const avgDeathIncrease = recentNewDeaths.reduce((sum, val) => sum + val, 0) / recentNewDeaths.length;
+                
+                const today = new Date();
+                let lastCaseCount = lastHistoryPoint.cumulativeCases;
+                let lastDeathCount = lastHistoryPoint.cumulativeDeaths;
+
+                for (let i = 1; i <= forecastDays; i++) {
+                    const futureDate = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+                    
+                    lastCaseCount += Math.round(avgCaseIncrease * 1.1); // 10% acceleration factor
+                    lastDeathCount += Math.round(avgDeathIncrease * 1.1);
                     
                     forecast.push({
                         date: futureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                        cases: Math.round(lastForecast.cases + avgCaseIncrease * 0.8), // Slightly lower growth factor for caution
-                        deaths: Math.round(lastForecast.deaths + avgDeathIncrease * 1.2) // Slightly higher fatality factor
+                        cumulativeCases: lastCaseCount,
+                        cumulativeDeaths: lastDeathCount
                     });
                 }
                 return forecast;
             };
 
-            const dailyTrends = getDailyTrends();
-            const shortTermForecast = generateForecast(dailyTrends);
+            const shortTermForecast = generateForecast(cumulativeHistory);
 
             // --- END TRENDS AND FORECASTING SIMULATION ---
-            
+
             const verifiedData = {
-                confirmed_cases: confirmedCases,
-                deaths: deaths,
+                confirmed_cases: cumulativeHistory[cumulativeHistory.length - 1].cumulativeCases, // Matches 12
+                deaths: cumulativeHistory[cumulativeHistory.length - 1].cumulativeDeaths, // Matches 7
                 suspected_cases: suspectedCases,
                 tests_conducted: testsConducted,
                 positive_cases: positiveCases,
@@ -471,31 +523,37 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 }),
-                // Explicitly including MOH Ethiopia and EPHI as primary sources
                 data_sources: ["MOH Ethiopia", "EPHI", "WHO", "US CDC", "UKHSA", "National Laboratory Network"],
                 data_discrepancies: {
                     case_range: "6-12",
                     death_range: "3-7",
                 },
                 recommendations: generateRecommendations(riskLevel, confirmedCases),
-                daily_trends: dailyTrends,
-                short_term_forecast: shortTermForecast
+                daily_new_data: dailyNewData, // Used for the table
+                cumulative_history: cumulativeHistory, // Used for the chart
+                short_term_forecast: shortTermForecast // Used for the chart
             };
 
             const situationReport = {
                 report_type: "Marburg Outbreak Situation Report - Ethiopia",
                 generated_at: verifiedData.last_updated,
-                executive_summary: `The Marburg Virus Disease (MVD) outbreak in Ethiopia remains a significant public health challenge, currently assessed at a **${riskLevel.toUpperCase()}** risk level. As of the latest report, consolidated figures indicate **${confirmedCases} Confirmed Cases** and **${deaths} Deaths**, resulting in a Case Fatality Rate (CFR) of ${caseFatalityRate}%. Surveillance and laboratory activities are ongoing, with **${suspectedCases} Suspected Cases** investigated and **${contactsMonitored} Contacts** under active monitoring. Significant efforts are underway to reconcile data variances between national and international partners (case range: ${verifiedData.data_discrepancies.case_range}, death range: ${verifiedData.data_discrepancies.death_range}). Immediate priorities include strengthening surveillance, ensuring adequate treatment capacity, and enhancing community risk communication.`,
+                executive_summary: `The Marburg Virus Disease (MVD) outbreak in Ethiopia remains a significant public health challenge, currently assessed at a **${riskLevel.toUpperCase()}** risk level. As of the latest report, consolidated figures indicate **${verifiedData.confirmed_cases} Confirmed Cases** and **${verifiedData.deaths} Deaths**, resulting in a Case Fatality Rate (CFR) of ${caseFatalityRate}%. Surveillance and laboratory activities are ongoing, with **${suspectedCases} Suspected Cases** investigated and **${contactsMonitored} Contacts** under active monitoring. Significant efforts are underway to reconcile data variances between national and international partners (case range: ${verifiedData.data_discrepancies.case_range}, death range: ${verifiedData.data_discrepancies.death_range}). Immediate priorities include strengthening surveillance, ensuring adequate treatment capacity, and enhancing community risk communication.`,
                 key_metrics: verifiedData,
                 status: "Active Outbreak",
                 alert_level: riskLevel,
             };
 
-            return { verifiedData, situationReport };
+            return {
+                verifiedData,
+                situationReport
+            };
         };
 
 
         // --- RENDERING LOGIC ---
+
+        // Global Chart Instance
+        let forecastChartInstance = null;
 
         const renderDashboard = (data) => {
             const grid = document.getElementById('metric-grid');
@@ -581,13 +639,12 @@
             `;
             // Apply appropriate style/animation based on risk level
             riskStatus.className = `p-4 rounded-xl shadow-2xl text-center min-w-40 text-white
-                ${data.risk_level.includes('High') || data.risk_level === 'Critical' 
-                ? 'status-gradient-high animate-pulse-high' 
-                : 'bg-red-700'}`;
+                ${data.risk_level.includes('High') || data.risk_level === 'Critical'
+                    ? 'status-gradient-high animate-pulse-high'
+                    : 'bg-red-700'}`;
 
             // Update the data note
             const dataNoteParagraph = note.querySelector('p:last-child');
-            // Ensure we don't duplicate the text on multiple init calls
             if (!dataNoteParagraph.textContent.includes("Last Confirmed Range")) {
                 dataNoteParagraph.innerHTML += ` (Last Confirmed Range: ${data.data_discrepancies.case_range} cases, ${data.data_discrepancies.death_range} deaths)`;
             }
@@ -623,25 +680,164 @@
         };
 
         const renderAnalysis = (data) => {
-            // Render Daily Trends
+            // Render Daily New Data Table
             const trendsBody = document.getElementById('daily-trends-data');
-            trendsBody.innerHTML = data.daily_trends.map(day => `
+            trendsBody.innerHTML = data.daily_new_data.map(day => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${day.date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-semibold">${day.cases}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${day.deaths}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-semibold">${day.newCases}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${day.newDeaths}</td>
                 </tr>
             `).join('');
 
-            // Render Forecasting
-            const forecastBody = document.getElementById('forecasting-data');
-            forecastBody.innerHTML = data.short_term_forecast.map(day => `
-                <tr class="bg-red-50 hover:bg-red-100 font-bold">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-800">${day.date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-900">${day.cases} (Est.)</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${day.deaths} (Est.)</td>
-                </tr>
-            `).join('');
+            // --- Render Forecasting Chart ---
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+
+            // 1. Prepare Data
+            const allLabels = data.cumulative_history.map(d => d.date)
+                .concat(data.short_term_forecast.map(d => d.date));
+            const historyCaseData = data.cumulative_history.map(d => d.cumulativeCases);
+            const forecastCaseData = data.short_term_forecast.map(d => d.cumulativeCases);
+            const historyDeathData = data.cumulative_history.map(d => d.cumulativeDeaths);
+            const forecastDeathData = data.short_term_forecast.map(d => d.cumulativeDeaths);
+
+            // Create zero-filled data for the historical segment of the forecast line
+            const forecastPadding = new Array(historyCaseData.length - 1).fill(null);
+
+            // 2. Destroy old chart instance if it exists
+            if (forecastChartInstance) {
+                forecastChartInstance.destroy();
+            }
+
+            // 3. Create new chart instance
+            forecastChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allLabels,
+                    datasets: [
+                        // Dataset 1: Confirmed Cases (Historical + Forecast)
+                        {
+                            label: 'Confirmed Cases (Historical)',
+                            data: historyCaseData.concat(null, null, null),
+                            borderColor: 'rgb(239, 68, 68)', // Red
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: 'rgb(239, 68, 68)',
+                            pointBorderColor: '#fff',
+                            spanGaps: true // Crucial for forecast padding
+                        },
+                        {
+                            label: 'Cases Forecast',
+                            data: forecastPadding.concat(historyCaseData[historyCaseData.length - 1], forecastCaseData),
+                            borderColor: 'rgba(239, 68, 68, 0.6)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            pointBorderColor: '#fff',
+                            spanGaps: true
+                        },
+                         // Dataset 3: Deaths (Historical + Forecast)
+                        {
+                            label: 'Deaths (Historical)',
+                            data: historyDeathData.concat(null, null, null),
+                            borderColor: 'rgb(107, 114, 128)', // Gray
+                            backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: 'rgb(107, 114, 128)',
+                            pointBorderColor: '#fff',
+                            spanGaps: true
+                        },
+                        {
+                            label: 'Deaths Forecast',
+                            data: forecastPadding.concat(historyDeathData[historyDeathData.length - 1], forecastDeathData),
+                            borderColor: 'rgba(107, 114, 128, 0.6)',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: 'rgba(107, 114, 128, 0.6)',
+                            pointBorderColor: '#fff',
+                            spanGaps: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: false,
+                        },
+                        legend: {
+                            labels: {
+                                font: {
+                                    family: 'Inter',
+                                },
+                                // Filter out redundant historical/forecast labels in the legend
+                                filter: (legendItem, data) => {
+                                    return legendItem.datasetIndex === 0 || legendItem.datasetIndex === 1 || legendItem.datasetIndex === 2 || legendItem.datasetIndex === 3;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cumulative Count',
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Reporting Date',
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        }
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                return data.datasets[tooltipItem.datasetIndex].label + ': ' + tooltipItem.formattedValue;
+                            }
+                        }
+                    }
+                }
+            });
         };
 
 
@@ -652,14 +848,14 @@
                 verifiedData,
                 situationReport
             } = getOutbreakData();
-            
+
             renderDashboard(verifiedData);
             renderAnalysis(verifiedData); // New call
             renderReport(situationReport, verifiedData);
-            
+
             // Set current year in footer
             document.getElementById('year').textContent = new Date().getFullYear();
-            
+
             // Mobile menu toggle
             document.getElementById('menu-button').addEventListener('click', () => {
                 document.getElementById('mobile-menu').classList.toggle('hidden');
