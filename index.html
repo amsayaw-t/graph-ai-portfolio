@@ -128,20 +128,6 @@
         </div>
     </div>
 
-    <!-- PIN Access Modal -->
-    <div id="pin-modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-8 text-gray-900">
-            <h3 class="text-xl font-extrabold text-center mb-4">Admin Access Required</h3>
-            <p class="text-sm text-gray-600 text-center mb-6">Enter the 4-digit PIN to access the Data Entry Form.</p>
-            <form id="pin-form">
-                <input type="password" id="pin-input" maxlength="4" required class="w-full p-4 text-center text-2xl font-mono border-2 border-gray-300 rounded-lg tracking-widest focus:border-red-500" placeholder="••••">
-                <button type="submit" class="w-full mt-6 px-4 py-3 bg-red-700 text-white font-bold rounded-lg hover:bg-red-800 transition">Unlock Data Entry</button>
-                <p id="pin-message" class="mt-4 text-sm text-red-600 text-center hidden">Incorrect PIN. Please try again.</p>
-            </form>
-        </div>
-    </div>
-
-
     <!-- Navigation Bar -->
     <nav class="sticky top-0 z-50 bg-white shadow-lg backdrop-blur-sm bg-opacity-95">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,11 +150,6 @@
                     <a href="#bulletin" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Public Bulletin</a>
                     <a href="#resources" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Resources</a>
                     <a href="#research" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Research</a>
-                    
-                    <!-- Admin Access Button -->
-                    <button id="admin-access-btn" class="px-3 py-1 bg-gray-200 text-gray-800 font-semibold rounded-lg text-sm hover:bg-red-700 hover:text-white transition duration-200">
-                        Admin Access
-                    </button>
                 </div>
                 <div class="md:hidden">
                     <button id="menu-button" class="text-gray-600 hover:text-red-700 focus:outline-none">
@@ -188,7 +169,6 @@
                  <a href="#bulletin" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Public Bulletin</a>
                 <a href="#resources" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Resources</a>
                 <a href="#research" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Research</a>
-                <button id="admin-access-btn-mobile" class="px-3 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg text-sm hover:bg-red-700 hover:text-white transition duration-200 text-left">Admin Access</button>
             </div>
         </div>
     </nav>
@@ -563,12 +543,12 @@
     </section>
 
     <!-- Data Entry Form (Moved to Bottom) -->
-    <section id="data-entry" class="py-16 sm:py-24 bg-red-800 text-white hidden">
+    <section id="data-entry" class="py-16 sm:py-24 bg-red-800 text-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-4xl font-extrabold text-center mb-6">
                 Official Data Entry (Admin Only)
             </h2>
-            <p class="text-center text-red-100 mb-10">Use this form to update the official national figures for the latest reporting cycle.</p>
+            <p class="text-center text-red-100 mb-10">Use this form to update the official national figures for the latest reporting cycle. **Warning: This form is visible to all users and is not password protected.**</p>
 
             <form id="update-data-form" class="bg-white p-8 rounded-xl shadow-2xl text-gray-900">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -784,14 +764,13 @@
             // Calculate active cases (On Treatment) based on core data integrity principle
             const calculatedOnTreatment = totalConfirmedCases - totalDeaths - totalRecovered;
 
-            // Log error if data integrity is violated (but use the calculated value)
-            if (calculatedOnTreatment !== currentOutbreakState.on_treatment) {
-                 console.warn(`Data integrity error: Outcomes (D+R+T) do not match Confirmed Cases. Using calculated On Treatment: ${calculatedOnTreatment}.`);
-            }
-            
-            // Use Math.max to ensure value is never negative in the report
+            // Use the stored value for rendering unless it violates integrity, then use the calculated one
             const finalOnTreatment = Math.max(0, calculatedOnTreatment);
 
+            if (calculatedOnTreatment !== currentOutbreakState.on_treatment) {
+                 console.warn(`Data integrity error: Outcomes (D+R+T) do not match Confirmed Cases. Using calculated On Treatment: ${finalOnTreatment}.`);
+            }
+            
             // Fixed secondary data
             const suspectedCases = 90; 
             const positiveCases = totalConfirmedCases; 
@@ -812,10 +791,9 @@
 
             // Function to replicate risk assessment logic
             const assessRiskLevel = (cases, fatalityRate, activeCases) => {
-                if (activeCases === 0) return "Moderate"; // Contained cluster, historical high CFR is not active risk.
+                if (activeCases === 0) return "Moderate"; 
                 if (cases === 0) return "Low";
                 
-                // Active cases > 0
                 if (cases <= 15) return fatalityRate < 50 ? "High" : "Very High"; 
                 if (cases <= 30) return "Very High";
                 return "Critical";
@@ -851,8 +829,6 @@
 
             // --- TRENDS AND FORECASTING SIMULATION ---
             const getDailyNewData = (refDate) => {
-                // Simplified historical data for the last 7 days totaling current confirmed cases
-                // Using 13 cases (0, 1, 2, 2, 3, 3, 2) and 8 deaths (0, 0, 1, 3, 2, 1, 1)
                 const newCasesData = [0, 1, 2, 2, 3, 3, 2]; 
                 const newDeathsData = [0, 0, 1, 3, 2, 1, 1]; 
                 
@@ -880,7 +856,6 @@
                     currentCumDeaths += d.newDeaths;
                     
                     if (index === newDailyData.length - 1) {
-                        // Ensure the final day matches the current total
                         currentCumCases = totalConfirmedCases; 
                         currentCumDeaths = totalDeaths; 
                     }
@@ -914,7 +889,6 @@
                     const futureDate = new Date(REPORT_DATE.getTime() + i * 24 * 60 * 60 * 1000); 
                     
                     if (activeCases > 0) {
-                        // Predict a small linear increase based on recent average
                         lastCaseCount += Math.round(avgCaseIncrease * 0.5); 
                         lastDeathCount += Math.round(avgCaseIncrease * (totalDeaths / totalConfirmedCases) * 0.5);
                     }
@@ -977,7 +951,6 @@
 
         // --- RENDERING LOGIC ---
         let forecastChartInstance = null;
-        const ADMIN_PIN = "2025"; // The hardcoded secret PIN
 
         // Utility function to calculate the forecast end date (42 days after last active case)
         const calculateForecastEndDate = (activeCases, lastUpdateDate) => {
@@ -1410,66 +1383,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top for user to see changes
         };
 
-        // --- ADMIN PIN GATE ---
-
-        const toggleDataEntryAccess = (loggedIn) => {
-            const dataEntry = document.getElementById('data-entry');
-            const adminButton = document.getElementById('admin-access-btn');
-            const adminButtonMobile = document.getElementById('admin-access-btn-mobile');
-
-            if (loggedIn) {
-                dataEntry.classList.remove('hidden');
-                adminButton.textContent = 'Log Out';
-                adminButton.classList.add('bg-red-700', 'text-white');
-                adminButton.classList.remove('bg-gray-200', 'text-gray-800');
-                
-                adminButtonMobile.textContent = 'Log Out';
-                adminButtonMobile.classList.add('bg-red-700', 'text-white');
-                adminButtonMobile.classList.remove('bg-gray-200', 'text-gray-800');
-            } else {
-                dataEntry.classList.add('hidden');
-                adminButton.textContent = 'Admin Access';
-                adminButton.classList.remove('bg-red-700', 'text-white');
-                adminButton.classList.add('bg-gray-200', 'text-gray-800');
-
-                adminButtonMobile.textContent = 'Admin Access';
-                adminButtonMobile.classList.remove('bg-red-700', 'text-white');
-                adminButtonMobile.classList.add('bg-gray-200', 'text-gray-800');
-            }
-        };
-
-        const handlePinSubmission = (event) => {
-            event.preventDefault();
-            const pinInput = document.getElementById('pin-input');
-            const pinMessage = document.getElementById('pin-message');
-
-            if (pinInput.value === ADMIN_PIN) {
-                document.getElementById('pin-modal').classList.remove('active');
-                toggleDataEntryAccess(true);
-                pinInput.value = ''; // Clear PIN
-                pinMessage.classList.add('hidden');
-            } else {
-                pinMessage.classList.remove('hidden');
-                pinInput.value = '';
-                pinInput.focus();
-            }
-        };
-
-        const handleAdminButtonClick = () => {
-            const dataEntry = document.getElementById('data-entry');
-            
-            if (dataEntry.classList.contains('hidden')) {
-                // Not logged in, show PIN modal
-                document.getElementById('pin-modal').classList.add('active');
-                document.getElementById('pin-message').classList.add('hidden');
-                document.getElementById('pin-input').focus();
-            } else {
-                // Logged in, log out
-                toggleDataEntryAccess(false);
-            }
-        };
-
-
         // --- INITIALIZATION ---
 
         const init = () => {
@@ -1493,20 +1406,7 @@
                 document.getElementById('menu-button').addEventListener('click', () => {
                     document.getElementById('mobile-menu').classList.toggle('hidden');
                 });
-
-                // Admin gate listeners
-                document.getElementById('admin-access-btn').addEventListener('click', handleAdminButtonClick);
-                document.getElementById('admin-access-btn-mobile').addEventListener('click', handleAdminButtonClick);
-                document.getElementById('pin-form').addEventListener('submit', handlePinSubmission);
                 
-                // Close modal on escape key
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        document.getElementById('pin-modal').classList.remove('active');
-                    }
-                });
-
-
                 // Form submission listener
                 document.getElementById('update-data-form').addEventListener('submit', handleDataSubmission);
 
