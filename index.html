@@ -86,13 +86,61 @@
         
         /* New style for the moderate risk level */
         .status-gradient-moderate {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Green */
-            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange */
+            box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+
+        /* Modal specific styling */
+        .modal {
+            transition: opacity 0.3s ease;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
     </style>
 </head>
 
 <body>
+
+    <!-- Document Viewer Modal -->
+    <div id="document-viewer" class="modal fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start border-b pb-4 mb-4 sticky top-0 bg-white">
+                    <div>
+                        <h3 id="doc-title" class="text-2xl font-extrabold text-gray-900">Document Title</h3>
+                        <p id="doc-source" class="text-sm text-gray-500 mt-1">Source Information</p>
+                    </div>
+                    <button id="close-viewer-btn" class="text-gray-500 hover:text-gray-700 transition">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="doc-content" class="text-gray-700 leading-relaxed text-base">
+                    <!-- Document content will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Access Modal -->
+    <div id="pin-modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-8 text-gray-900">
+            <h3 class="text-xl font-extrabold text-center mb-4">Admin Access Required</h3>
+            <p class="text-sm text-gray-600 text-center mb-6">Enter the 4-digit PIN to access the Data Entry Form.</p>
+            <form id="pin-form">
+                <input type="password" id="pin-input" maxlength="4" required class="w-full p-4 text-center text-2xl font-mono border-2 border-gray-300 rounded-lg tracking-widest focus:border-red-500" placeholder="••••">
+                <button type="submit" class="w-full mt-6 px-4 py-3 bg-red-700 text-white font-bold rounded-lg hover:bg-red-800 transition">Unlock Data Entry</button>
+                <p id="pin-message" class="mt-4 text-sm text-red-600 text-center hidden">Incorrect PIN. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
 
     <!-- Navigation Bar -->
     <nav class="sticky top-0 z-50 bg-white shadow-lg backdrop-blur-sm bg-opacity-95">
@@ -109,14 +157,18 @@
                     </a>
                 </div>
 
-                <div class="hidden md:flex space-x-8">
+                <div class="hidden md:flex space-x-8 items-center">
                     <a href="#dashboard" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Dashboard</a>
                     <a href="#analysis" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Data Analysis</a>
-                    <a href="#about" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">About MVD</a>
                     <a href="#report" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Situation Report</a>
                     <a href="#bulletin" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Public Bulletin</a>
                     <a href="#resources" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Resources</a>
                     <a href="#research" class="text-gray-600 hover:text-red-700 transition duration-150 font-medium">Research</a>
+                    
+                    <!-- Admin Access Button -->
+                    <button id="admin-access-btn" class="px-3 py-1 bg-gray-200 text-gray-800 font-semibold rounded-lg text-sm hover:bg-red-700 hover:text-white transition duration-200">
+                        Admin Access
+                    </button>
                 </div>
                 <div class="md:hidden">
                     <button id="menu-button" class="text-gray-600 hover:text-red-700 focus:outline-none">
@@ -132,11 +184,11 @@
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
                 <a href="#dashboard" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Dashboard</a>
                 <a href="#analysis" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Data Analysis</a>
-                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">About MVD</a>
                 <a href="#report" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Situation Report</a>
                  <a href="#bulletin" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Public Bulletin</a>
                 <a href="#resources" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Resources</a>
                 <a href="#research" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-red-50">Research</a>
+                <button id="admin-access-btn-mobile" class="px-3 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg text-sm hover:bg-red-700 hover:text-white transition duration-200 text-left">Admin Access</button>
             </div>
         </div>
     </nav>
@@ -175,7 +227,7 @@
                 <!-- Data will be populated here by JavaScript -->
             </div>
             <p id="dashboard-refresh-note" class="mt-4 text-center text-sm text-gray-500">
-                Data refreshes automatically every 15 seconds (simulated live feed).
+                Update metrics using the Data Entry Form at the bottom of the page.
             </p>
 
             <!-- Risk Level & Action Status -->
@@ -204,14 +256,14 @@
             <h2 class="text-4xl font-extrabold text-gray-900 text-center mb-12">
                 Outbreak Data Analysis
             </h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
                 <!-- Daily Trends (Table - showing NEW cases) -->
-                <div class="p-8 rounded-2xl shadow-xl border border-gray-100 border-2 border-gray-200">
+                <div class="lg:col-span-1 p-8 rounded-2xl shadow-xl border border-gray-100 border-2 border-gray-200">
                     <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                         <span class="text-3xl mr-3">🗓️</span> Daily New Case Trends
                     </h3>
-                    <p class="text-gray-600 mb-6">Confirmed *new* cases and deaths reported daily over the last 7 days.</p>
+                    <p class="text-gray-600 mb-6">Confirmed new cases and deaths reported daily over the last 7 days.</p>
                     <div id="daily-trends-container" class="space-y-4 overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
                             <thead class="bg-gray-50">
@@ -229,7 +281,7 @@
                 </div>
 
                 <!-- Short-Term Forecasting (Chart - showing CUMULATIVE cases/deaths) -->
-                <div class="p-8 rounded-2xl shadow-xl border border-gray-100 bg-gray-50 border-2 border-gray-200">
+                <div class="lg:col-span-2 p-8 rounded-2xl shadow-xl border border-gray-100 bg-gray-50 border-2 border-gray-200">
                     <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                         <span class="text-3xl mr-3">🔮</span> Cumulative Trend & Forecast
                     </h3>
@@ -240,6 +292,28 @@
                     <p class="mt-8 text-sm text-gray-500 italic">This chart tracks the overall growth curve. The model estimate (dashed line) is based on simplified epidemiological principles and is subject to change.</p>
                 </div>
             </div>
+
+            <!-- Outbreak End Forecast Panel (NEW) -->
+            <div class="mt-16 bg-red-50 p-8 rounded-2xl shadow-xl border-l-4 border-red-600">
+                <h3 class="text-2xl font-bold text-red-800 mb-4 flex items-center">
+                    <span class="text-3xl mr-3">🛑</span> Outbreak End Forecast
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Active Cases Used:</p>
+                        <p id="forecast-active-cases" class="text-3xl font-extrabold text-red-700 mt-1"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Estimated Final Containment Date (42-Day Clock):</p>
+                        <p id="forecast-end-date" class="text-3xl font-extrabold text-gray-900 mt-1"></p>
+                    </div>
+                    <div class="md:col-span-1">
+                         <p class="text-sm font-semibold text-gray-700">Basis for Prediction:</p>
+                        <p class="text-sm text-gray-600 mt-1">Requires 42 consecutive days (two maximum incubation periods) with **zero new cases** after the last active patient is discharged/dies. Date is projected from the current "On Treatment" count.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -343,19 +417,19 @@
                     </h3>
                     <ul class="space-y-3">
                         <li>
-                            <a href="https://ephi.gov.et/mvd-genomic-sequencing-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-ephi-genomic" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Genomic Sequencing of Ethiopian MVD Strains (EPHI Report)
                             </a>
                             <p class="text-sm text-gray-600">Analysis of the current circulating virus strains for mutation detection.</p>
                         </li>
                         <li>
-                            <a href="https://aau.edu.et/public-health-journal-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-aau-risk" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Socio-Demographic Risk Factors in Southern Ethiopia MVD Outbreak
                             </a>
                             <p class="text-sm text-gray-600">Addis Ababa University (AAU) study on community transmission drivers.</p>
                         </li>
                         <li>
-                            <a href="https://moh.gov.et/bat-reservoir-study-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-moh-bat" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Preliminary Findings on Bat Reservoir Monitoring in Oromia
                             </a>
                             <p class="text-sm text-gray-600">Ecological survey identifying potential zoonotic spillover points.</p>
@@ -370,19 +444,19 @@
                     </h3>
                     <ul class="space-y-3">
                         <li>
-                            <a href="https://www.thelancet.com/mvd-vaccine-trial-mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-vaccine" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 Phase 2 Trial Results of Investigational MVD Vaccine (The Lancet)
                             </a>
                             <p class="text-sm text-gray-600">Clinical efficacy and safety data for leading vaccine candidates.</p>
                         </li>
                         <li>
-                            <a href="https://www.nejm.org/mvd-monoclonal-mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-mab" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 Efficacy of Monoclonal Antibody Treatment for Filoviruses (NEJM)
                             </a>
                             <p class="text-sm text-gray-600">New England Journal of Medicine analysis on antiviral therapies.</p>
                         </li>
                         <li>
-                            <a href="https://www.nature.com/mvd-diagnostic-mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-rdt" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 Rapid Diagnostic Test Development for Marburg (Nature Microbiology)
                             </a>
                             <p class="text-sm text-gray-600">Advancements in point-of-care diagnostics for immediate testing.</p>
@@ -409,19 +483,19 @@
                     </h3>
                     <ul class="space-y-3">
                         <li>
-                            <a href="https://moh.gov.et/mvd-nims-plan-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-moh-nims" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Ethiopia MVD National Incident Management Plan (Latest)
                             </a>
                             <p class="text-sm text-gray-600">MoH/EPHI joint policy on outbreak response and coordination.</p>
                         </li>
                         <li>
-                            <a href="https://moh.gov.et/ipc-guidance-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-moh-ipc" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Infection Prevention Control (IPC) Guidelines for MVD
                             </a>
                             <p class="text-sm text-gray-600">Specific protocols for healthcare workers and burial teams.</p>
                         </li>
                         <li>
-                            <a href="https://moh.gov.et/risk-communication-mock" target="_blank" class="font-medium text-red-700 hover:text-red-900 transition underline">
+                            <a href="#" data-doc-id="doc-moh-riskcomm" class="document-link font-medium text-red-700 hover:text-red-900 transition underline">
                                 Community Risk Communication Strategy - Amharic (PDF)
                             </a>
                             <p class="text-sm text-gray-600">Official material for public awareness and messaging.</p>
@@ -436,19 +510,19 @@
                     </h3>
                     <ul class="space-y-3">
                         <li>
-                            <a href="https://www.who.int/emergencies/disease-outbreak-news-mvd-mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-who" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 WHO Marburg Fact Sheet and Q&A
                             </a>
                             <p class="text-sm text-gray-600">Up-to-date global information on the virus and its control.</p>
                         </li>
                         <li>
-                            <a href="https://www.cdc.gov/vhf/marburg/treatment-mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-cdc" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 CDC Clinical Guidance for MVD Case Management
                             </a>
                             <p class="text-sm text-gray-600">Best practices for treating symptomatic patients and supportive care.</p>
                         </li>
                         <li>
-                            <a href="https://www.who.int/ihr/2005/mock" target="_blank" class="font-medium text-blue-700 hover:text-blue-900 transition underline">
+                            <a href="#" data-doc-id="doc-global-ihr" class="document-link font-medium text-blue-700 hover:text-blue-900 transition underline">
                                 International Health Regulations (IHR) 2005 Framework
                             </a>
                             <p class="text-sm text-gray-600">Mandatory framework for reporting and responding to severe public health events.</p>
@@ -488,6 +562,61 @@
         </div>
     </section>
 
+    <!-- Data Entry Form (Moved to Bottom) -->
+    <section id="data-entry" class="py-16 sm:py-24 bg-red-800 text-white hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-extrabold text-center mb-6">
+                Official Data Entry (Admin Only)
+            </h2>
+            <p class="text-center text-red-100 mb-10">Use this form to update the official national figures for the latest reporting cycle.</p>
+
+            <form id="update-data-form" class="bg-white p-8 rounded-xl shadow-2xl text-gray-900">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Confirmed Cases -->
+                    <div>
+                        <label for="confirmed-cases" class="block text-sm font-bold mb-1 text-red-700">Total Confirmed Cases <span class="text-xs font-normal text-gray-500">(All Outcomes)</span></label>
+                        <input type="number" id="confirmed-cases" min="0" required class="w-full p-3 border-2 border-red-300 rounded-lg focus:border-red-500">
+                    </div>
+
+                    <!-- Tests Conducted -->
+                    <div>
+                        <label for="tests-conducted" class="block text-sm font-bold mb-1 text-red-700">Total Laboratory Tests Conducted</label>
+                        <input type="number" id="tests-conducted" min="0" required class="w-full p-3 border-2 border-red-300 rounded-lg focus:border-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <!-- Deaths -->
+                    <div>
+                        <label for="deaths" class="block text-sm font-bold mb-1 text-gray-700">Total Deaths</label>
+                        <input type="number" id="deaths" min="0" required class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-red-500">
+                    </div>
+
+                    <!-- Recovered -->
+                    <div>
+                        <label for="recovered" class="block text-sm font-bold mb-1 text-gray-700">Total Recovered Patients</label>
+                        <input type="number" id="recovered" min="0" required class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-red-500">
+                    </div>
+
+                    <!-- On Treatment -->
+                    <div>
+                        <label for="on-treatment" class="block text-sm font-bold mb-1 text-gray-700">Patients On Treatment <span class="text-xs font-normal text-gray-500">(Active Cases)</span></label>
+                        <input type="number" id="on-treatment" min="0" required class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-red-500">
+                    </div>
+                </div>
+
+                <p id="data-entry-message" class="mt-4 text-center text-sm font-semibold text-red-600"></p>
+
+                <div class="mt-8 text-center">
+                    <button type="submit" class="px-8 py-3 bg-red-700 text-white font-bold rounded-xl shadow-lg hover:bg-red-800 transition duration-300 transform hover:scale-[1.01]">
+                        Update National Outbreak Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
     <!-- Contact & Footer -->
     <footer id="contact" class="bg-gray-800 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -503,13 +632,12 @@
                     <ul class="space-y-1 text-sm">
                         <li><a href="#dashboard" class="text-gray-300 hover:text-white transition">Dashboard</a></li>
                         <li><a href="#analysis" class="text-gray-300 hover:text-white transition">Data Analysis</a></li>
-                        <li><a href="#about" class="text-gray-300 hover:text-white transition">About MVD</a></li>
                         <li><a href="#report" class="text-gray-300 hover:text-white transition">Situation Report</a></li>
                         <li><a href="#bulletin" class="text-gray-300 hover:text-white transition">Public Bulletin</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="text-lg font-bold mb-3 text-yellow-400">Contact IPC Team</h4>
+                    <h4 class="text-lg font-bold mb-3 text-yellow-400">Contact EOC Team</h4>
                     <p class="text-sm text-gray-400">
                         Public Health Emergency Operations Center (PHEOC)<br>
                         Email: pheoc@moh.gov.et (Mock Address)<br>
@@ -524,82 +652,178 @@
     </footer>
 
     <script>
-        // --- DATA LOGIC (Replicating Python `MarburgOutbreakMonitor` calculations) ---
+        // --- MOCK DOCUMENT DATABASE ---
+        const MVD_DOCUMENTS = {
+            "doc-moh-nims": {
+                title: "Ethiopia MVD National Incident Management Plan (Latest)",
+                source: "Ethiopia Ministry of Health (MoH), 2025",
+                content: `
+                    <p><strong>Section 1: Activation and Command Structure</strong></p>
+                    <p>The National Incident Management System (NIMS) is activated at Level 2 (High Alert). Command is centralized under the Emergency Operations Center (EOC) in Addis Ababa, coordinating regional rapid response teams. Key objectives include preventing inter-regional transmission and securing all identified burial sites.</p>
+                    <p><strong>Section 2: Surveillance and Laboratory Capacity</strong></p>
+                    <p>Surveillance efforts focus on the Southern and Oromia regions, requiring all healthcare facilities to report suspected viral hemorrhagic fever (VHF) cases within 4 hours. EPHI laboratories maintain 24/7 testing capacity (RT-PCR) with external quality assurance from WHO collaborating centers.</p>
+                    <p><strong>Section 3: Logistics and Resource Mobilization</strong></p>
+                    <p>Resource priorities include immediate procurement of Level 4 Personal Protective Equipment (PPE), deployment of isolation tent facilities, and mobilization of social mobilization teams for risk communication in high-density areas. International aid coordination is managed through the Ministry of Finance and Economic Development (MoFED).</p>
+                `
+            },
+            "doc-moh-ipc": {
+                title: "Infection Prevention Control (IPC) Guidelines for MVD",
+                source: "Ethiopian Public Health Institute (EPHI), 2025",
+                content: `
+                    <p><strong>Universal Precautions:</strong> All patient contact requires full Level 4 PPE (impermeable gown, N95 mask minimum, double gloves, face shield). Hand hygiene protocols (alcohol-based rub or soap and water) must be followed immediately upon doffing and re-donning gloves.</p>
+                    <p><strong>Waste Management:</strong> All potentially infectious waste, including linens and sharps, must be segregated at the point of generation into double-bagged biohazard containers and incinerated at designated high-temperature sites only.</p>
+                    <p><strong>Burial Protocol:</strong> All confirmed and probable MVD fatalities must be handled by trained, certified burial teams. Traditional washing or direct contact with the body is strictly forbidden. Coffins must be sealed and burials conducted rapidly to prevent community exposure.</p>
+                `
+            },
+            "doc-moh-riskcomm": {
+                title: "Community Risk Communication Strategy - Amharic (PDF)",
+                source: "Ethiopia Ministry of Health (MoH), 2025",
+                content: `
+                    <p><strong>Objective:</strong> To minimize community transmission by ensuring 90% awareness of MVD symptoms, transmission routes, and reporting procedures within affected woredas.</p>
+                    <p><strong>Key Messages:</strong> 1. Report fever/bleeding immediately (Hotline 8383). 2. Avoid contact with bats and consumption of bushmeat. 3. Trust the official MVD burial teams. 4. Isolate immediately if you have had contact with a known case.</p>
+                    <p><strong>Channels:</strong> Utilize regional radio broadcasts, mobile van announcements, local clergy and community leaders, and official social media channels to disseminate information in Amharic, Oromo, and local languages.</p>
+                `
+            },
+            "doc-global-who": {
+                title: "WHO Marburg Fact Sheet and Q&A",
+                source: "World Health Organization (WHO), November 2025",
+                content: `
+                    <p><strong>Virus Overview:</strong> Marburg virus is a filovirus, genetically related to Ebola virus. The average case fatality ratio (CFR) across all outbreaks ranges from 24% to 88%, depending on case management and outbreak setting. No approved vaccine or treatment is currently licensed, but several are under evaluation.</p>
+                    <p><strong>Treatment:</strong> Treatment is supportive—balancing the patient's fluids and electrolytes, maintaining oxygen status and blood pressure, replacing lost blood and clotting factors, and treating any co-existing infections.</p>
+                    <p><strong>Global Risk:</strong> MVD poses a global public health risk due to its high CFR and potential for rapid spread in settings with poor infection control. Enhanced global surveillance and cross-border cooperation are essential for rapid containment.</p>
+                `
+            },
+            "doc-global-cdc": {
+                title: "CDC Clinical Guidance for MVD Case Management",
+                source: "U.S. Centers for Disease Control and Prevention (CDC)",
+                content: `
+                    <p><strong>Clinical Manifestations:</strong> The illness progresses rapidly from non-specific flu-like symptoms to multi-organ failure and shock. Patients often present with profound fatigue and lack of energy early on. Non-bloody vomiting and diarrhea often start by day 3.</p>
+                    <p><strong>Fluid Management:</strong> Aggressive intravenous fluid resuscitation is necessary due to severe fluid loss from diarrhea and vomiting. Careful hemodynamic monitoring is required to prevent pulmonary edema.</p>
+                    <p><strong>Antivirals:</strong> While no approved treatment exists, clinical trials of investigational therapeutics (monoclonal antibodies and antivirals) may be available under emergency use protocols. Clinicians must consult the EOC before administering investigational drugs.</p>
+                `
+            },
+            "doc-global-ihr": {
+                title: "International Health Regulations (IHR) 2005 Framework",
+                source: "World Health Organization (WHO)",
+                content: `
+                    <p><strong>Purpose:</strong> The IHR (2005) is an international legal instrument that binds 196 countries, including Ethiopia. Its aim is to prevent, protect against, control, and provide a public health response to the international spread of disease in ways that are commensurate with and restricted to public health risks, and which avoid unnecessary interference with international traffic and trade.</p>
+                    <p><strong>Mandate for Reporting:</strong> States Parties must notify WHO of all events that may constitute a Public Health Emergency of International Concern (PHEIC) within 24 hours of assessment.</p>
+                `
+            },
+            "doc-ephi-genomic": {
+                title: "Genomic Sequencing of Ethiopian MVD Strains (EPHI Report)",
+                source: "EPHI National Reference Laboratory, Preliminary Report",
+                content: `
+                    <p><strong>Finding:</strong> Preliminary sequencing of samples from four confirmed cases indicates the virus strain belongs to the Marburg virus subtype associated with past outbreaks in East Africa. No significant novel mutations affecting transmissibility or vaccine efficacy targets have been detected in the current cluster.</p>
+                    <p><strong>Implication:</strong> The current data suggests that the existing knowledge base and investigational medical countermeasures (e.g., vaccine candidates) remain relevant for the current strain.</p>
+                `
+            },
+            "doc-aau-risk": {
+                title: "Socio-Demographic Risk Factors in Southern Ethiopia MVD Outbreak",
+                source: "Addis Ababa University (AAU), Faculty of Public Health",
+                content: `
+                    <p><strong>Key Finding:</strong> The highest risk factor for initial human infection was traced to contact with bat habitats (caves, mines). Secondary transmission clusters were primarily linked to traditional burial practices and lapses in Infection Prevention Control (IPC) in small rural clinics.</p>
+                    <p><strong>Recommendation:</strong> Risk communication efforts must focus equally on discouraging bat habitat interaction and reinforcing safe IPC practices among non-specialized healthcare staff.</p>
+                `
+            },
+            "doc-moh-bat": {
+                title: "Preliminary Findings on Bat Reservoir Monitoring in Oromia",
+                source: "MoH Zoonotic Disease Surveillance Unit, 2025",
+                content: `
+                    <p><strong>Survey Result:</strong> Active surveillance in known *Rousettus* bat colonies has shown a stable but low prevalence of Marburg virus antibodies. The spillover event is likely related to human encroachment into specific, high-risk mining or caving areas rather than a widespread change in the bat population dynamics.</p>
+                    <p><strong>Action:</strong> Implement temporary closure of specific caves/mines in the designated outbreak zone to reduce the risk of primary spillover.</p>
+                `
+            },
+            "doc-global-vaccine": {
+                title: "Phase 2 Trial Results of Investigational MVD Vaccine (The Lancet)",
+                source: "The Lancet, International Vaccine Consortium",
+                content: `
+                    <p><strong>Results Summary:</strong> The leading candidate MVD vaccine (ChAd3-MVD) demonstrated an 85% seroconversion rate after a single dose in adult volunteers. The vaccine was well-tolerated, with mild to moderate adverse events reported. Full efficacy data requires Phase 3 trials.</p>
+                    <p><strong>Deployment Implication:</strong> Results support the safety and immunogenicity necessary for a Ring Vaccination Strategy, should emergency deployment be approved by regulatory bodies.</p>
+                `
+            },
+            "doc-global-mab": {
+                title: "Efficacy of Monoclonal Antibody Treatment for Filoviruses (NEJM)",
+                source: "New England Journal of Medicine (NEJM)",
+                content: `
+                    <p><strong>Treatment Efficacy:</strong> A triple monoclonal antibody (MAb) cocktail was found to significantly reduce mortality in non-human primate models challenged with Marburg virus. Early administration (within 48 hours of symptom onset) was critical for maximizing survival.</p>
+                    <p><strong>Policy Note:</strong> The Ministry of Health must secure access to these investigational therapies under compassionate use or expanded access protocols for use in treatment centers.</p>
+                `
+            },
+            "doc-global-rdt": {
+                title: "Rapid Diagnostic Test Development for Marburg (Nature Microbiology)",
+                source: "Nature Microbiology, Diagnostics Development Group",
+                content: `
+                    <p><strong>Innovation:</strong> A new lateral flow rapid diagnostic test (RDT) achieved 95% sensitivity and 98% specificity compared to gold-standard RT-PCR testing. This RDT is designed for use in resource-limited settings.</p>
+                    <p><strong>Impact:</strong> Deployment of this RDT could drastically reduce diagnostic turnaround time in remote areas, enhancing patient isolation and contact tracing speed.</p>
+                `
+            }
+        };
+
+
+        // --- STATE MANAGEMENT AND DATA LOGIC ---
+        // Initial state, reflecting the last input (13C, 8D, 4R, 1T, 888 Tests as of Dec 2)
+        let currentOutbreakState = {
+            totalConfirmedCases: 13,
+            totalDeaths: 8,
+            totalRecovered: 4,
+            testsConducted: 888,
+            on_treatment: 1, // Calculated from 13 - 8 - 4
+        };
+        const REPORT_DATE = new Date(2025, 11, 2, 17, 0, 0); // December 2, 2025
+
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
         const API_KEY = ""; // Placeholder for Canvas runtime environment
 
         /**
-         * Generates the simulated outbreak data and situation report based on the provided Python logic.
+         * Fetches and calculates the outbreak data based on the current global state.
          */
-        const getOutbreakData = (isLive = false) => {
-            // --- SET REPORT DATE TO DECEMBER 2, 2025 (BASE DATE) ---
-            // Month is 0-indexed: 11 is December
-            const baseDate = new Date(2025, 11, 2, 17, 0, 0); 
+        const getOutbreakData = () => {
+            const { totalConfirmedCases, totalDeaths, totalRecovered, testsConducted } = currentOutbreakState;
             
-            // --- UPDATED SIMULATED MOH CONSOLIDATED DATA INPUTS (As of Dec 2, 2025) ---
-            let totalConfirmedCases = 13; 
-            let totalDeaths = 8;        
-            let totalRecovered = 4;     
-            let testsConducted = 888;   
-            
-            // SIMULATE LIVE DATA DRIFT (if called via setInterval)
-            if (isLive) {
-                // Introduce slight, non-breaking drift in active cases and tests over time
-                const drift = Math.floor(Math.random() * 2) - 1; // -1, 0, or 1
-                
-                // Active cases (On Treatment) might fluctuate, but must be >= 0
-                let activeCases = totalConfirmedCases - totalDeaths - totalRecovered; // Starts at 1
-                
-                // If active cases are currently 0, only drift upwards (new case) or stay at 0
-                if (activeCases === 0) {
-                    const newCase = Math.random() < 0.1 ? 1 : 0; // 10% chance of a new case
-                    activeCases = newCase;
-                } else {
-                    activeCases = Math.max(0, activeCases + drift); 
-                }
-                
-                // Re-calculate Total Confirmed Cases to reflect the drift in active cases
-                totalConfirmedCases = totalDeaths + totalRecovered + activeCases;
-                testsConducted = 888 + Math.floor(Math.random() * 5); // Tests slightly increase
+            // Calculate active cases (On Treatment) based on core data integrity principle
+            const calculatedOnTreatment = totalConfirmedCases - totalDeaths - totalRecovered;
 
-                // Update the report date to the current time for live update timestamp
-                baseDate.setTime(Date.now());
+            // Log error if data integrity is violated (but use the calculated value)
+            if (calculatedOnTreatment !== currentOutbreakState.on_treatment) {
+                 console.warn(`Data integrity error: Outcomes (D+R+T) do not match Confirmed Cases. Using calculated On Treatment: ${calculatedOnTreatment}.`);
             }
-
-            const referenceDate = baseDate;
-            const totalOnTreatment = totalConfirmedCases - totalDeaths - totalRecovered; // Should be 1 initially
+            
+            // Use Math.max to ensure value is never negative in the report
+            const finalOnTreatment = Math.max(0, calculatedOnTreatment);
 
             // Fixed secondary data
-            const suspectedCases = 90; // Kept fixed, representing total investigated individuals
+            const suspectedCases = 90; 
             const positiveCases = totalConfirmedCases; 
             const contactsMonitored = 500; 
 
-            // --- DATA SOURCE LIST UPDATED ---
+            // --- DATA SOURCE LIST ---
             const dataSources = [
                 "Official Website: moh.gov.et",
                 "Twitter (X): x.com/fmohealth",
-                "Ethiopian Public Health Institute (EPHI)" // Keeping EPHI as a source for comprehensive reporting
+                "Ethiopian Public Health Institute (EPHI)"
             ];
             
-            // Data Discrepancy is now irrelevant with single source
+            // Mock Data Discrepancy (Needed for report structure)
             const dataDiscrepancies = {
-                case_range: `Unified MoH/EPHI Report: ${totalConfirmedCases}`, 
-                death_range: `Unified MoH/EPHI Report: ${totalDeaths}`, 
+                case_range: `Unified Report: ${totalConfirmedCases}`, 
+                death_range: `Unified Report: ${totalDeaths}`, 
             };
 
             // Function to replicate risk assessment logic
             const assessRiskLevel = (cases, fatalityRate, activeCases) => {
-                if (activeCases === 0 && cases > 0) return "Moderate"; // Contained cluster, high CFR is historical risk.
+                if (activeCases === 0) return "Moderate"; // Contained cluster, historical high CFR is not active risk.
                 if (cases === 0) return "Low";
-                // 1 active case, high CFR means risk remains heightened
-                if (cases <= 15) return fatalityRate < 50 ? "Moderate" : "High"; 
-                if (cases <= 30) return "High";
+                
+                // Active cases > 0
+                if (cases <= 15) return fatalityRate < 50 ? "High" : "Very High"; 
+                if (cases <= 30) return "Very High";
                 return "Critical";
             };
 
             const caseFatalityRate = ((totalDeaths / totalConfirmedCases) * 100).toFixed(1); 
-            const testPositivityRate = ((positiveCases / testsConducted) * 100).toFixed(1); // 1.5%
-            const riskLevel = assessRiskLevel(totalConfirmedCases, parseFloat(caseFatalityRate), totalOnTreatment); // Calculated as "High" (1 active case)
+            const testPositivityRate = ((positiveCases / testsConducted) * 100).toFixed(1); 
+            const riskLevel = assessRiskLevel(totalConfirmedCases, parseFloat(caseFatalityRate), finalOnTreatment); 
 
             // Function to generate recommendations (replicates Python logic)
             const generateRecommendations = (riskLevel, cases) => {
@@ -614,7 +838,7 @@
                         "Conduct targeted risk communication emphasizing community vigilance.",
                         "Maintain operational readiness of Isolation/Treatment Centers."
                     );
-                } else if (["High", "Critical"].includes(riskLevel)) {
+                } else if (["High", "Very High", "Critical"].includes(riskLevel)) {
                     recommendations.push(
                         "Activate national incident management system.",
                         "Mobilize national resources immediately.",
@@ -622,13 +846,13 @@
                     );
                 }
                 
-                // Return unique recommendations only
                 return [...new Set(recommendations)];
             };
 
-            // --- TRENDS AND FORECASTING SIMULATION (Using base case count) ---
+            // --- TRENDS AND FORECASTING SIMULATION ---
             const getDailyNewData = (refDate) => {
-                // Data for the last 7 days totaling 13 cases and 8 deaths
+                // Simplified historical data for the last 7 days totaling current confirmed cases
+                // Using 13 cases (0, 1, 2, 2, 3, 3, 2) and 8 deaths (0, 0, 1, 3, 2, 1, 1)
                 const newCasesData = [0, 1, 2, 2, 3, 3, 2]; 
                 const newDeathsData = [0, 0, 1, 3, 2, 1, 1]; 
                 
@@ -645,20 +869,20 @@
                 }));
             };
 
-            const dailyNewData = getDailyNewData(baseDate);
+            const dailyNewData = getDailyNewData(REPORT_DATE);
 
             const getCumulativeData = (newDailyData) => {
                 let currentCumCases = 0;
                 let currentCumDeaths = 0;
                 
-                // Adjust the last cumulative entry to match the potentially 'live' totalConfirmedCases
                 const historyData = newDailyData.map((d, index) => {
                     currentCumCases += d.newCases;
                     currentCumDeaths += d.newDeaths;
                     
                     if (index === newDailyData.length - 1) {
-                         // Apply the totalConfirmedCases to the final day of history
+                        // Ensure the final day matches the current total
                         currentCumCases = totalConfirmedCases; 
+                        currentCumDeaths = totalDeaths; 
                     }
 
                     return {
@@ -676,27 +900,24 @@
                 newDeaths: d.newDeaths
             })));
 
-            const generateForecast = (cumulativeHistory) => {
+            const generateForecast = (cumulativeHistory, activeCases) => {
                 const forecastDays = 3;
                 const forecast = [];
                 
-                // Simple average increase over last 3 days for trend
                 const recentNewCases = dailyNewData.slice(-3).map(d => d.newCases);
-                const recentNewDeaths = dailyNewData.slice(-3).map(d => d.newDeaths);
-                
                 const avgCaseIncrease = recentNewCases.reduce((sum, val) => sum + val, 0) / recentNewCases.length; 
-                const avgDeathIncrease = recentNewDeaths.reduce((sum, val) => sum + val, 0) / recentNewDeaths.length; 
                 
-                // Forecast starts from the end of the historical period (current data point)
                 let lastCaseCount = cumulativeHistory[cumulativeHistory.length - 1].cumulativeCases;
                 let lastDeathCount = cumulativeHistory[cumulativeHistory.length - 1].cumulativeDeaths;
 
                 for (let i = 1; i <= forecastDays; i++) {
-                    const futureDate = new Date(referenceDate.getTime() + i * 24 * 60 * 60 * 1000); 
+                    const futureDate = new Date(REPORT_DATE.getTime() + i * 24 * 60 * 60 * 1000); 
                     
-                    // Since active cases is 1, forecast minimal continued growth
-                    lastCaseCount += (totalOnTreatment > 0 ? Math.round(avgCaseIncrease * 1.05) : 0); 
-                    lastDeathCount += (totalOnTreatment > 0 ? Math.round(avgCaseIncrease * (totalDeaths / totalConfirmedCases) * 1.05) : 0);
+                    if (activeCases > 0) {
+                        // Predict a small linear increase based on recent average
+                        lastCaseCount += Math.round(avgCaseIncrease * 0.5); 
+                        lastDeathCount += Math.round(avgCaseIncrease * (totalDeaths / totalConfirmedCases) * 0.5);
+                    }
                     
                     forecast.push({
                         date: futureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -707,15 +928,14 @@
                 return forecast;
             };
 
-            const shortTermForecast = generateForecast(cumulativeHistory);
-
+            const shortTermForecast = generateForecast(cumulativeHistory, finalOnTreatment);
             // --- END TRENDS AND FORECASTING SIMULATION ---
 
             const verifiedData = {
                 confirmed_cases: totalConfirmedCases, 
                 deaths: totalDeaths, 
                 recovered_cases: totalRecovered,
-                on_treatment: totalOnTreatment,
+                on_treatment: finalOnTreatment,
                 suspected_cases: suspectedCases,
                 tests_conducted: testsConducted,
                 positive_cases: positiveCases,
@@ -723,7 +943,7 @@
                 test_positivity_rate: parseFloat(testPositivityRate),
                 contacts_monitored: contactsMonitored,
                 risk_level: riskLevel,
-                last_updated: referenceDate.toLocaleDateString('en-US', {
+                last_updated: REPORT_DATE.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -734,9 +954,9 @@
                 data_sources: dataSources,
                 data_discrepancies: dataDiscrepancies,
                 recommendations: generateRecommendations(riskLevel, totalConfirmedCases),
-                daily_new_data: dailyNewData, // Used for the table
-                cumulative_history: cumulativeHistory, // Used for the chart
-                short_term_forecast: shortTermForecast // Used for the chart
+                daily_new_data: dailyNewData, 
+                cumulative_history: cumulativeHistory, 
+                short_term_forecast: shortTermForecast 
             };
 
             const situationReport = {
@@ -744,7 +964,7 @@
                 generated_at: verifiedData.last_updated,
                 executive_summary: `The Marburg Virus Disease (MVD) outbreak is currently assessed at a <b>${riskLevel.toUpperCase()}</b> risk level. Official figures from the Ministry of Health (as of December 2, 2025) confirm a total of <b>${verifiedData.confirmed_cases} Confirmed Cases</b>, with <b>${verifiedData.recovered_cases} Recovered</b> and <b>${verifiedData.deaths} Deaths</b>. Crucially, <b>${verifiedData.on_treatment} patient</b> is currently On Treatment, requiring immediate isolation and intensive care. The high Case Fatality Rate (CFR: ${caseFatalityRate}%) demands sustained intensive surveillance and strict adherence to Infection Prevention and Control (IPC) protocols to contain any further spread.`,
                 key_metrics: verifiedData,
-                status: "Active Surveillance & Response - High Alert",
+                status: finalOnTreatment > 0 ? "Active Surveillance & Response - High Alert" : "Outbreak Contained - Monitoring Period",
                 alert_level: riskLevel,
             };
 
@@ -754,26 +974,29 @@
             };
         };
 
-        // Simulates async fetch (100ms delay)
-        const fetchOutbreakData = (isLive = false) => {
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(getOutbreakData(isLive));
-                }, 100);
-            });
-        };
 
         // --- RENDERING LOGIC ---
-
-        // Global Chart Instance
         let forecastChartInstance = null;
+        const ADMIN_PIN = "2025"; // The hardcoded secret PIN
 
-        const renderDashboard = async (isLive = false) => {
-            const { verifiedData: data } = await fetchOutbreakData(isLive);
+        // Utility function to calculate the forecast end date (42 days after last active case)
+        const calculateForecastEndDate = (activeCases, lastUpdateDate) => {
+            // The 42-day clock starts ONLY when activeCases == 0
+            if (activeCases > 0) {
+                return "Containment Clock Not Started";
+            }
+            // If activeCases is 0, the clock starts from the date of the report (lastUpdateDate)
+            const endDate = new Date(lastUpdateDate.getTime());
+            endDate.setDate(endDate.getDate() + 42); 
+            return endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+
+        const renderDashboard = async () => {
+            const { verifiedData: data } = getOutbreakData();
 
             const grid = document.getElementById('metric-grid');
             const riskStatus = document.getElementById('risk-status');
-            const note = document.getElementById('data-note');
 
             const metrics = [{
                     label: "Confirmed Cases",
@@ -783,7 +1006,7 @@
                     bg: "bg-red-100"
                 },
                 {
-                    label: "Deaths Reported",
+                    label: "Total Deaths",
                     value: data.deaths,
                     icon: "💀",
                     color: "text-gray-700",
@@ -825,7 +1048,7 @@
                     bg: "bg-yellow-100"
                 },
                 {
-                    label: "Tests Conducted", // Changed label for clarity
+                    label: "Total Tests Conducted",
                     value: data.tests_conducted,
                     icon: "🔬",
                     color: "text-purple-700",
@@ -852,37 +1075,33 @@
                 <p class="text-sm font-semibold opacity-80">RISK LEVEL</p>
                 <p class="text-3xl font-extrabold mt-1">${data.risk_level.toUpperCase()}</p>
             `;
-            // Determine the risk status class based on the calculated risk level
             let riskClass = '';
             if (data.risk_level === 'Moderate') {
                 riskClass = 'status-gradient-moderate';
             } else if (data.risk_level.includes('High') || data.risk_level === 'Critical') {
                 riskClass = 'status-gradient-high animate-pulse-high';
             } else {
-                riskClass = 'bg-gray-500'; // Default for Low
+                riskClass = 'bg-gray-500'; 
             }
 
             riskStatus.className = `p-4 rounded-xl shadow-2xl text-center min-w-40 text-white ${riskClass}`;
 
-            // Update the data note
-            const dataNoteParagraph = note.querySelector('p:last-child');
-            dataNoteParagraph.textContent = `All figures presented are derived exclusively from the Ministry of Health official website and public reports (moh.gov.et, x.com).`;
-
-
             // Update hero date
             document.getElementById('last-updated-hero').textContent = `Last Consolidated Update: ${data.last_updated}`;
             
-            // Only update the Analysis and Report on the initial load, not every 15 seconds.
-            if (!isLive) {
-                 const { situationReport } = await fetchOutbreakData(isLive);
-                 renderAnalysis(data); 
-                 renderReport(situationReport, data);
+            // Render dependent sections
+            const { situationReport } = getOutbreakData();
+            renderAnalysis(data); 
+            renderReport(situationReport, data);
+            renderForecastEndPanel(data);
 
-                 // Setup LLM button listener (only once)
-                 document.getElementById('generate-bulletin-btn').addEventListener('click', () => {
-                     generateBulletin(data);
-                 });
-            }
+            // Update data entry form (ensure the form fields reflect the current data)
+            document.getElementById('confirmed-cases').value = data.confirmed_cases;
+            document.getElementById('tests-conducted').value = data.tests_conducted;
+            document.getElementById('deaths').value = data.deaths;
+            document.getElementById('recovered').value = data.recovered_cases;
+            document.getElementById('on-treatment').value = data.on_treatment;
+
         };
 
         const renderReport = (report, data) => {
@@ -915,7 +1134,6 @@
             // Render Daily New Data Table
             const trendsBody = document.getElementById('daily-trends-data');
             trendsBody.innerHTML = data.daily_new_data.map(day => {
-                // Determine coloring for the new data table based on active cases
                 const caseColor = data.on_treatment > 0 ? 'text-red-700' : 'text-gray-700';
 
                 return `
@@ -937,7 +1155,6 @@
             const historyDeathData = data.cumulative_history.map(d => d.cumulativeDeaths);
             const forecastDeathData = data.short_term_forecast.map(d => d.cumulativeDeaths);
 
-            // Create null-filled data for the historical segment of the forecast line
             const forecastPadding = new Array(historyCaseData.length - 1).fill(null);
 
             // 2. Destroy old chart instance if it exists
@@ -964,7 +1181,7 @@
                             pointHoverRadius: 7,
                             pointBackgroundColor: 'rgb(239, 68, 68)',
                             pointBorderColor: '#fff',
-                            spanGaps: true // Crucial for forecast padding
+                            spanGaps: true 
                         },
                         {
                             label: 'Cases Forecast',
@@ -1023,7 +1240,6 @@
                                 font: {
                                     family: 'Inter',
                                 },
-                                // Filter out redundant historical/forecast labels in the legend
                                 filter: (legendItem, data) => {
                                     return legendItem.datasetIndex === 0 || legendItem.datasetIndex === 1 || legendItem.datasetIndex === 2 || legendItem.datasetIndex === 3;
                                 }
@@ -1045,6 +1261,26 @@
                     }
                 }
             });
+        };
+
+        const renderForecastEndPanel = (data) => {
+            const lastUpdateDate = new Date(REPORT_DATE.getTime());
+            const forecastEndDate = calculateForecastEndDate(data.on_treatment, lastUpdateDate);
+
+            document.getElementById('forecast-active-cases').textContent = data.on_treatment;
+            document.getElementById('forecast-end-date').textContent = forecastEndDate;
+
+            const endPanel = document.querySelector('#analysis .bg-red-50');
+            
+            if (data.on_treatment > 0) {
+                // Active cases exist: HIGH ALERT
+                endPanel.classList.add('bg-red-50', 'border-red-600');
+                endPanel.classList.remove('bg-green-50', 'border-green-600');
+            } else {
+                 // Zero active cases: CONTAINMENT
+                endPanel.classList.add('bg-green-50', 'border-green-600');
+                endPanel.classList.remove('bg-red-50', 'border-red-600');
+            }
         };
 
 
@@ -1133,22 +1369,122 @@
             }
         };
 
-        // --- INITIALIZATION ---
+        // --- DATA ENTRY AND FORM HANDLING ---
 
-        const startLiveUpdates = () => {
-            // Initial load (isLive = false for static report/analysis rendering)
-            renderDashboard(false); 
+        const handleDataSubmission = (event) => {
+            event.preventDefault();
+            const messageElement = document.getElementById('data-entry-message');
 
-            // Set interval to update only the dashboard metrics every 15 seconds
-            setInterval(() => {
-                renderDashboard(true); // isLive = true to enable data drift simulation
-                console.log('Dashboard metrics updated automatically.');
-            }, 15000); 
+            const newConfirmed = parseInt(document.getElementById('confirmed-cases').value) || 0;
+            const newDeaths = parseInt(document.getElementById('deaths').value) || 0;
+            const newRecovered = parseInt(document.getElementById('recovered').value) || 0;
+            const newOnTreatment = parseInt(document.getElementById('on-treatment').value) || 0;
+            const newTests = parseInt(document.getElementById('tests-conducted').value) || 0;
+
+            const totalOutcomes = newDeaths + newRecovered + newOnTreatment;
+
+            // 1. Data Integrity Check (Must hold true for official reports)
+            if (newConfirmed !== totalOutcomes) {
+                messageElement.textContent = `Error: Data integrity failed. Confirmed Cases (${newConfirmed}) must equal Deaths (${newDeaths}) + Recovered (${newRecovered}) + On Treatment (${newOnTreatment}). Please adjust figures.`;
+                messageElement.classList.add('text-red-600');
+                messageElement.classList.remove('text-green-600');
+                return;
+            }
+
+            // 2. Update Global State
+            currentOutbreakState = {
+                totalConfirmedCases: newConfirmed,
+                totalDeaths: newDeaths,
+                totalRecovered: newRecovered,
+                totalOnTreatment: newOnTreatment, 
+                testsConducted: newTests,
+            };
+
+            // 3. Rerender Everything
+            renderDashboard();
+
+            // 4. Feedback
+            messageElement.textContent = `Success! Data updated for ${newConfirmed} Confirmed Cases. All dashboards and reports refreshed.`;
+            messageElement.classList.remove('text-red-600');
+            messageElement.classList.add('text-green-600');
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top for user to see changes
         };
+
+        // --- ADMIN PIN GATE ---
+
+        const toggleDataEntryAccess = (loggedIn) => {
+            const dataEntry = document.getElementById('data-entry');
+            const adminButton = document.getElementById('admin-access-btn');
+            const adminButtonMobile = document.getElementById('admin-access-btn-mobile');
+
+            if (loggedIn) {
+                dataEntry.classList.remove('hidden');
+                adminButton.textContent = 'Log Out';
+                adminButton.classList.add('bg-red-700', 'text-white');
+                adminButton.classList.remove('bg-gray-200', 'text-gray-800');
+                
+                adminButtonMobile.textContent = 'Log Out';
+                adminButtonMobile.classList.add('bg-red-700', 'text-white');
+                adminButtonMobile.classList.remove('bg-gray-200', 'text-gray-800');
+            } else {
+                dataEntry.classList.add('hidden');
+                adminButton.textContent = 'Admin Access';
+                adminButton.classList.remove('bg-red-700', 'text-white');
+                adminButton.classList.add('bg-gray-200', 'text-gray-800');
+
+                adminButtonMobile.textContent = 'Admin Access';
+                adminButtonMobile.classList.remove('bg-red-700', 'text-white');
+                adminButtonMobile.classList.add('bg-gray-200', 'text-gray-800');
+            }
+        };
+
+        const handlePinSubmission = (event) => {
+            event.preventDefault();
+            const pinInput = document.getElementById('pin-input');
+            const pinMessage = document.getElementById('pin-message');
+
+            if (pinInput.value === ADMIN_PIN) {
+                document.getElementById('pin-modal').classList.remove('active');
+                toggleDataEntryAccess(true);
+                pinInput.value = ''; // Clear PIN
+                pinMessage.classList.add('hidden');
+            } else {
+                pinMessage.classList.remove('hidden');
+                pinInput.value = '';
+                pinInput.focus();
+            }
+        };
+
+        const handleAdminButtonClick = () => {
+            const dataEntry = document.getElementById('data-entry');
+            
+            if (dataEntry.classList.contains('hidden')) {
+                // Not logged in, show PIN modal
+                document.getElementById('pin-modal').classList.add('active');
+                document.getElementById('pin-message').classList.add('hidden');
+                document.getElementById('pin-input').focus();
+            } else {
+                // Logged in, log out
+                toggleDataEntryAccess(false);
+            }
+        };
+
+
+        // --- INITIALIZATION ---
 
         const init = () => {
             try {
-                startLiveUpdates();
+                // Set initial state from default data (ensures consistency)
+                const initialData = getOutbreakData();
+                currentOutbreakState = {
+                    totalConfirmedCases: initialData.verifiedData.confirmed_cases,
+                    totalDeaths: initialData.verifiedData.deaths,
+                    totalRecovered: initialData.verifiedData.recovered_cases,
+                    totalOnTreatment: initialData.verifiedData.on_treatment, 
+                    testsConducted: initialData.verifiedData.tests_conducted,
+                };
+                
+                renderDashboard();
                 
                 // Set current year in footer
                 document.getElementById('year').textContent = new Date().getFullYear();
@@ -1157,16 +1493,54 @@
                 document.getElementById('menu-button').addEventListener('click', () => {
                     document.getElementById('mobile-menu').classList.toggle('hidden');
                 });
+
+                // Admin gate listeners
+                document.getElementById('admin-access-btn').addEventListener('click', handleAdminButtonClick);
+                document.getElementById('admin-access-btn-mobile').addEventListener('click', handleAdminButtonClick);
+                document.getElementById('pin-form').addEventListener('submit', handlePinSubmission);
+                
+                // Close modal on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.getElementById('pin-modal').classList.remove('active');
+                    }
+                });
+
+
+                // Form submission listener
+                document.getElementById('update-data-form').addEventListener('submit', handleDataSubmission);
+
+                // LLM button listener (only once)
+                document.getElementById('generate-bulletin-btn').addEventListener('click', () => {
+                     const { verifiedData: data } = getOutbreakData(); // Get latest data
+                     generateBulletin(data);
+                 });
+
+                // Document viewer listeners
+                document.querySelectorAll('.document-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const docId = e.target.getAttribute('data-doc-id');
+                        const doc = MVD_DOCUMENTS[docId];
+                        if (doc) {
+                            document.getElementById('doc-title').textContent = doc.title;
+                            document.getElementById('doc-source').textContent = doc.source;
+                            document.getElementById('doc-content').innerHTML = doc.content;
+                            document.getElementById('document-viewer').classList.add('active');
+                        }
+                    });
+                });
+                document.getElementById('close-viewer-btn').addEventListener('click', () => {
+                    document.getElementById('document-viewer').classList.remove('active');
+                });
+
             } catch (error) {
                 console.error("Initialization Error:", error);
-                alert("Failed to initialize dashboard data. Check console for details.");
+                document.getElementById('metric-grid').innerHTML = '<div class="col-span-4 p-8 bg-red-100 border border-red-400 rounded-xl text-red-800 font-bold text-center">Failed to load initial data. Check browser console for errors.</div>';
             }
         };
 
         window.onload = init;
     </script>
 </body>
-</html>       
-
-              
-           
+</html>
